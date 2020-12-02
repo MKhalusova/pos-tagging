@@ -15,14 +15,14 @@ fun main(){
     val listOfTestWords = Preprocessor.getTestWords(vocabMap,File("src/data/WSJ_24.pos"))
 
 
-    val hmm = HMM()
-    hmm.calculateCounts(trainingCorpus,vocabMap)
+    val hmm = HMM(trainingCorpus,vocabMap)
 
-    val A = hmm.createTransitionMatrix()
-    val B = hmm.createEmissionProbsMatrix(vocabMap)
+    val A = hmm.transitionMatrix
+    val B = hmm.emissionProbsMatrix
+//    val (bestProbs, bestPath) = hmm.initializeViterbiMatrices(A, B, listOf("I", "love", "to", "sleep"), vocabMap)
 
 
-    println(B[0,0])
-    println(B[3,1])
+    println(A[0,0])
+//    println(B[3,1])
 
 }
