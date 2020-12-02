@@ -6,14 +6,13 @@ import org.jetbrains.multik.ndarray.data.Ndarray
 import org.jetbrains.multik.ndarray.data.get
 import org.jetbrains.multik.ndarray.data.set
 
-class HMM(trainingCorpus: List<String>, vocab: Map<String, Int>) {
+class HMM() {
     //    transition counts - map of counts of <tag,tag> combinations
     private val transitionCounts = mutableMapOf<Pair<String, String>, Int>()
-    //    emission counts - mapn of counts of <tag,word> combinations
+    //    emission counts - map of counts of <tag,word> combinations
     private val emissionCounts = mutableMapOf<Pair<String, String>, Int>()
     //  tag -> number of times this tag appeared in the training data
     private val tagCounts = mutableMapOf<String, Int>()
-
 
     fun calculateCounts(trainingCorpus: List<String>, vocab: Map<String, Int>) {
         val preprocessor = Preprocessor
