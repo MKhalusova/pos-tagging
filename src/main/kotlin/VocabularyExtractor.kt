@@ -1,15 +1,18 @@
 import java.io.File
 
 fun createVocabulary(trainingDataFile: File): List<String> {
-    val lineList = trainingDataFile.readLines()
-    val words = lineList.map { getWord(it)}
+    val lineList = trainingDataFile.readLines().filter { it != "" }
 
-    val wordFrequences = words.groupingBy{it}.eachCount()
-    val vocabFromFile = wordFrequences.filter{ (key, value) -> value > 1}.keys.toList().sorted()
-    val unknowns = listOf("--n--", "--unk--", "--unk_adj--", "--unk_adv--", "--unk_digit--", "--unk_noun--",
-            "--unk_punct--", "--unk_upper--", "--unk_verb--")
+    val words = lineList.map { getWord(it) }
 
-    return vocabFromFile + unknowns
+    val wordFrequences = words.groupingBy { it }.eachCount()
+    val vocabFromFile = wordFrequences.filter { (key, value) -> value > 1 }.keys.toList().sorted()
+    val unknowns = listOf(
+        "--n--", "--unk--", "--unk_adj--", "--unk_adv--", "--unk_digit--", "--unk_noun--",
+        "--unk_punct--", "--unk_upper--", "--unk_verb--"
+    )
+
+    return (vocabFromFile + unknowns).sorted()
 }
 
 private fun getWord(line: String): String {
@@ -20,7 +23,7 @@ private fun getWord(line: String): String {
     return word
 }
 
-fun main(){
+fun main() {
     val trainingData = File("src/data/WSJ_02-21.pos")
     val vocabulary = createVocabulary(trainingData)
 

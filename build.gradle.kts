@@ -15,7 +15,7 @@ repositories {
 dependencies {
     testImplementation(kotlin("test-junit"))
     implementation("org.jetbrains.multik:multik-api:0.0.1-dev-7")
-    implementation("org.jetbrains.multik:multik-default:0.0.1-dev-7")
+    implementation("org.jetbrains.multik:multik-jvm:0.0.1-dev-7")
 }
 
 tasks.test {
