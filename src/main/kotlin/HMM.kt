@@ -6,17 +6,17 @@ import org.jetbrains.kotlinx.multik.ndarray.data.get
 import org.jetbrains.kotlinx.multik.ndarray.data.set
 import kotlin.math.ln
 
-class HMM(val trainingCorpus: List<String>, val vocab: Map<String, Int>) {
+class HMM(private val trainingCorpus: List<String>, private val vocab: Map<String, Int>) {
 
     private val transitionCounts = mutableMapOf<Pair<String, String>, Int>()
     private val emissionCounts = mutableMapOf<Pair<String, String>, Int>()
     private val tagCounts = mutableMapOf<String, Int>()
 
     private var NUMBER_OF_TAGS = 0
-    val NUMBER_OF_WORDS = vocab.size
+    private val NUMBER_OF_WORDS = vocab.size
 
-    lateinit var transitionMatrix: Ndarray<Double, D2>
-    lateinit var emissionProbsMatrix: Ndarray<Double, D2>
+    private lateinit var transitionMatrix: Ndarray<Double, D2>
+    private lateinit var emissionProbsMatrix: Ndarray<Double, D2>
 
     init {
         calculateCounts()
@@ -37,29 +37,27 @@ class HMM(val trainingCorpus: List<String>, val vocab: Map<String, Int>) {
         }
     }
 
-    fun createTransitionMatrix(
+    private fun createTransitionMatrix(
         alpha: Double = 0.001,
     ) {
-//      Get a sorted list of unique POS tags
         val tags = tagCounts.keys.toList().sorted()
 
-//      Count the number of unique POS tags
         transitionMatrix = mk.empty(NUMBER_OF_TAGS, NUMBER_OF_TAGS)
 
-//      Go through each row and column of the transition matrix A
+//      Go through each row and column of the transition matrix
         for (i in 0 until NUMBER_OF_TAGS) for (j in 0 until NUMBER_OF_TAGS) {
-//              Define the tuple (prev POS, current POS)
+//              Define the Pair (prev POS tag, current POS tag)
             val key = Pair(tags[i], tags[j])
-//              If the (prev POS, current POS) exists in the transition counts dictionary, change the count, otherwise don't
+//              If the (prev POS tag, current POS tag) exists in the transition counts dictionary, change the count
             val count = transitionCounts.getOrDefault(key, 0)
 //              Get the count of the previous tag (index position i) from tag counts
             val countPrevTag = tagCounts[tags[i]]
-//              Apply smoothing using count of the tuple, alpha,
+//              Apply smoothing to avoid numeric underflow
             transitionMatrix[i, j] = (count + alpha) / (alpha * NUMBER_OF_TAGS + countPrevTag!!)
         }
     }
 
-    fun createEmissionProbsMatrix(
+    private fun createEmissionProbsMatrix(
         alpha: Double = 0.001
     ) {
         val tags = tagCounts.keys.toList().sorted()
@@ -76,7 +74,7 @@ class HMM(val trainingCorpus: List<String>, val vocab: Map<String, Int>) {
         }
     }
 
-    fun initializeViterbiMatrices(
+    private fun initializeViterbiMatrices(
         sentence: List<String>,
     ): Pair<Ndarray<Double, D2>, Ndarray<Int, D2>> {
 //        will return two matrices: C = best probabilities (num of states x num of words in sentence) and
@@ -87,7 +85,7 @@ class HMM(val trainingCorpus: List<String>, val vocab: Map<String, Int>) {
         val bestPaths = mk.empty<Int, D2>(NUMBER_OF_TAGS, sentence.size)
 
         val startIdx = tags.indexOf("--s--")
-//        to initialize the matrices, we need to fill in the first column
+//       populating the first column of the bestProbs to initialize it
         for (i in 0 until NUMBER_OF_TAGS) {
             if (transitionMatrix[0, i] == 0.0) {
                 bestProbs[i, 0] = Double.NEGATIVE_INFINITY
@@ -98,7 +96,7 @@ class HMM(val trainingCorpus: List<String>, val vocab: Map<String, Int>) {
         return Pair(bestProbs, bestPaths)
     }
 
-    fun viterbiForward(
+    private fun viterbiForward(
         sentence: List<String>,
         bestProbs: Ndarray<Double, D2>,
         bestPaths: Ndarray<Int, D2>
@@ -111,7 +109,6 @@ class HMM(val trainingCorpus: List<String>, val vocab: Map<String, Int>) {
 
             var bestProbabilityToGetToWordIFromTagJ = Double.NEGATIVE_INFINITY
             var bestPathToWordI = 0
-
 
             for (k in 0 until NUMBER_OF_TAGS) {
 
@@ -129,7 +126,7 @@ class HMM(val trainingCorpus: List<String>, val vocab: Map<String, Int>) {
         return Pair(updatedProbs, updatedPaths)
     }
 
-    fun viterbiBackward(
+    private fun viterbiBackward(
         sentence: List<String>,
         bestProbs: Ndarray<Double, D2>,
         bestPaths: Ndarray<Int, D2>
@@ -142,7 +139,7 @@ class HMM(val trainingCorpus: List<String>, val vocab: Map<String, Int>) {
         val posPredictions = mutableListOf<String>()
 
         for (k in 0 until NUMBER_OF_TAGS) {
-//            finding the index of the maximum probability in the last column of the bestProbs
+//            finding the index of the cell with the highest probability in the last column of the bestProbs
             if (bestProbs[k, m - 1] > bestProbForLastWord) {
                 bestProbForLastWord = bestProbs[k, m - 1]
                 z[m - 1] = k
@@ -150,6 +147,8 @@ class HMM(val trainingCorpus: List<String>, val vocab: Map<String, Int>) {
         }
         posPredictions.add(tags[z[m - 1]])
 
+//        traversing the bestPaths backwards.
+//        each current cell contains the row index of the cell to go to in the next column
         for (i in m - 1 downTo 1) {
             val tagForWordI = bestPaths[z[i], i]
             z[i - 1] = tagForWordI
@@ -175,4 +174,3 @@ class HMM(val trainingCorpus: List<String>, val vocab: Map<String, Int>) {
     }
 
 }
-

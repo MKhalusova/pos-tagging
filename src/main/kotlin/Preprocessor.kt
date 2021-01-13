@@ -1,11 +1,17 @@
 import java.io.File
 
 object Preprocessor {
-    private val nounSuffix = listOf("action", "age", "ance", "cy", "dom", "ee", "ence", "er", "hood",
-        "ion", "ism", "ist", "ity", "ling", "ment", "ness", "or", "ry", "scape", "ship", "ty")
+
+//    heuristics for replacing words that are not in the vocabulary with unk-[...]
+    private val nounSuffix = listOf(
+        "action", "age", "ance", "cy", "dom", "ee", "ence", "er", "hood",
+        "ion", "ism", "ist", "ity", "ling", "ment", "ness", "or", "ry", "scape", "ship", "ty"
+    )
     private val verbSuffix = listOf("ate", "ify", "ise", "ize")
-    private val adjSuffix = listOf("able", "ese", "ful", "i", "ian", "ible", "ic", "ish", "ive",
-        "less", "ly", "ous")
+    private val adjSuffix = listOf(
+        "able", "ese", "ful", "i", "ian", "ible", "ic", "ish", "ive",
+        "less", "ly", "ous"
+    )
     private val advSuffix = listOf("ward", "wards", "wise")
 
 
