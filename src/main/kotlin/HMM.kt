@@ -165,13 +165,9 @@ class HMM(val trainingCorpus: List<String>, val vocab: Map<String, Int>) {
     }
 
 
-//    for score(test corpus):
-//    split test_corpus into (word, tag) pairs
-//    predictPOSSequence for words
-//    compare the word list and the tag list
-
-
     fun score(testWords: List<String>, testTags: List<String>): Double {
+        require(testWords.size == testTags.size) { "The size of testWords list doesn't match the size of the testTags list" }
+
         val predictions = this.predictPOSSequence(testWords)
         val numberOfCorrectPredictions = predictions.zip(testTags).count { it.first == it.second }
 
