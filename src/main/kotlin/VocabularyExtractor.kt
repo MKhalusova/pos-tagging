@@ -1,11 +1,13 @@
 import java.io.File
 
 fun createVocabulary(trainingDataFile: File): List<String> {
-//    Creates vocabulary from the training data file.
-//    The vocabulary includes all the words that are encountered more than once.
-//    This is done so that unknown words would have some representation in the the training data as well.
-//    The vocabulary is also appended with the list of various types of "unknown", and special "word" indicating
-//    beginning of the sentence - "--n--"
+/*
+    Creates vocabulary from the training data file.
+    The vocabulary includes all the words that are encountered more than once.
+    This is done so that unknown words would have some representation in the the training data as well.
+    The vocabulary is also appended with the list of various types of "unknown", and special "word" indicating
+    beginning of the sentence - "--n--"
+*/
 
     val lineList = trainingDataFile.readLines().filter { it != "" }
 

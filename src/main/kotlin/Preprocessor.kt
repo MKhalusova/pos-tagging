@@ -2,7 +2,7 @@ import java.io.File
 
 object Preprocessor {
 
-//    heuristics for replacing words that are not in the vocabulary with unk-[...]
+    /* heuristics for replacing words that are not in the vocabulary with unk-[...] */
     private val nounSuffix = listOf(
         "action", "age", "ance", "cy", "dom", "ee", "ence", "er", "hood",
         "ion", "ism", "ist", "ity", "ling", "ment", "ness", "or", "ry", "scape", "ship", "ty"

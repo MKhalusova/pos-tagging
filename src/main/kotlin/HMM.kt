@@ -44,15 +44,15 @@ class HMM(private val trainingCorpus: List<String>, private val vocab: Map<Strin
 
         transitionMatrix = mk.empty(NUMBER_OF_TAGS, NUMBER_OF_TAGS)
 
-//      Go through each row and column of the transition matrix
+/* Go through each row and column of the transition matrix */
         for (i in 0 until NUMBER_OF_TAGS) for (j in 0 until NUMBER_OF_TAGS) {
-//              Define the Pair (prev POS tag, current POS tag)
+/* Define the Pair (prev POS tag, current POS tag) */
             val key = Pair(tags[i], tags[j])
-//              If the (prev POS tag, current POS tag) exists in the transition counts dictionary, change the count
+/* If the (prev POS tag, current POS tag) exists in the transition counts dictionary, change the count */
             val count = transitionCounts.getOrDefault(key, 0)
-//              Get the count of the previous tag (index position i) from tag counts
+/* Get the count of the previous tag (index position i) from tag counts */
             val countPrevTag = tagCounts[tags[i]]
-//              Apply smoothing to avoid numeric underflow
+/* Apply smoothing to avoid numeric underflow */
             transitionMatrix[i, j] = (count + alpha) / (alpha * NUMBER_OF_TAGS + countPrevTag!!)
         }
     }
@@ -77,15 +77,17 @@ class HMM(private val trainingCorpus: List<String>, private val vocab: Map<Strin
     private fun initializeViterbiMatrices(
         sentence: List<String>,
     ): Pair<Ndarray<Double, D2>, Ndarray<Int, D2>> {
-//        will return two matrices: C = best probabilities (num of states x num of words in sentence) and
-//        D = best paths (num of states x num of words in sentence)
+    /*
+    returns two matrices: bestProbs = best probabilities (num of states by num of words in sentence) and
+    bestPaths = best paths (num of states by num of words in sentence)
+    */
 
         val tags = tagCounts.keys.toList().sorted()
         val bestProbs = mk.empty<Double, D2>(NUMBER_OF_TAGS, sentence.size)
         val bestPaths = mk.empty<Int, D2>(NUMBER_OF_TAGS, sentence.size)
 
         val startIdx = tags.indexOf("--s--")
-//       populating the first column of the bestProbs to initialize it
+        /* populating the first column of the bestProbs to initialize it */
         for (i in 0 until NUMBER_OF_TAGS) {
             if (transitionMatrix[0, i] == 0.0) {
                 bestProbs[i, 0] = Double.NEGATIVE_INFINITY
@@ -139,7 +141,7 @@ class HMM(private val trainingCorpus: List<String>, private val vocab: Map<Strin
         val posPredictions = mutableListOf<String>()
 
         for (k in 0 until NUMBER_OF_TAGS) {
-//            finding the index of the cell with the highest probability in the last column of the bestProbs
+        /* finding the index of the cell with the highest probability in the last column of the bestProbs */
             if (bestProbs[k, m - 1] > bestProbForLastWord) {
                 bestProbForLastWord = bestProbs[k, m - 1]
                 z[m - 1] = k
@@ -147,8 +149,10 @@ class HMM(private val trainingCorpus: List<String>, private val vocab: Map<Strin
         }
         posPredictions.add(tags[z[m - 1]])
 
-//        traversing the bestPaths backwards.
-//        each current cell contains the row index of the cell to go to in the next column
+        /*
+        traversing the bestPaths backwards.
+        each current cell contains the row index of the cell to go to in the next column
+        */
         for (i in m - 1 downTo 1) {
             val tagForWordI = bestPaths[z[i], i]
             z[i - 1] = tagForWordI
