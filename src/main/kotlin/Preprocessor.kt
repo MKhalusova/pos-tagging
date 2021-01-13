@@ -1,32 +1,11 @@
 import java.io.File
 
 object Preprocessor {
-
-    private val nounSuffix = listOf(
-        "action",
-        "age",
-        "ance",
-        "cy",
-        "dom",
-        "ee",
-        "ence",
-        "er",
-        "hood",
-        "ion",
-        "ism",
-        "ist",
-        "ity",
-        "ling",
-        "ment",
-        "ness",
-        "or",
-        "ry",
-        "scape",
-        "ship",
-        "ty"
-    )
+    private val nounSuffix = listOf("action", "age", "ance", "cy", "dom", "ee", "ence", "er", "hood",
+        "ion", "ism", "ist", "ity", "ling", "ment", "ness", "or", "ry", "scape", "ship", "ty")
     private val verbSuffix = listOf("ate", "ify", "ise", "ize")
-    private val adjSuffix = listOf("able", "ese", "ful", "i", "ian", "ible", "ic", "ish", "ive", "less", "ly", "ous")
+    private val adjSuffix = listOf("able", "ese", "ful", "i", "ian", "ible", "ic", "ish", "ive",
+        "less", "ly", "ous")
     private val advSuffix = listOf("ward", "wards", "wise")
 
 
@@ -55,20 +34,20 @@ object Preprocessor {
         } else return Pair("--n--", "--s--")
     }
 
-    fun getTestWords(vocab: Map<String, Int>, testDataFile: File): List<String> {
-        val listOfWords = mutableListOf<String>()
+    fun getTestWordsAndTags(vocab: Map<String, Int>, testDataFile: File): List<Pair<String, String>> {
+        val wordsAndTags = mutableListOf<Pair<String, String>>()
         val lines = testDataFile.readLines()
 
         for (line in lines) {
-            val (word, _) = getWordAndTagFromLine(line, vocab)
+            val (word, tag) = getWordAndTagFromLine(line, vocab)
             if (word == "") {
-                listOfWords.add("--n--")
+                wordsAndTags.add(Pair("--n--", "--s--"))
             } else if (!vocab.containsKey(word)) {
-                listOfWords.add(assignUnk(word))
-            } else listOfWords.add(word)
+                wordsAndTags.add(Pair(assignUnk(word), tag))
+            } else wordsAndTags.add(Pair(word, tag))
         }
 
-        return listOfWords
+        return wordsAndTags
     }
 
 }

@@ -1,10 +1,10 @@
+import org.jetbrains.kotlinx.multik.api.empty
+import org.jetbrains.kotlinx.multik.api.mk
+import org.jetbrains.kotlinx.multik.ndarray.data.D2
+import org.jetbrains.kotlinx.multik.ndarray.data.Ndarray
+import org.jetbrains.kotlinx.multik.ndarray.data.get
+import org.jetbrains.kotlinx.multik.ndarray.data.set
 import kotlin.math.ln
-import org.jetbrains.multik.api.empty
-import org.jetbrains.multik.api.mk
-import org.jetbrains.multik.ndarray.data.D2
-import org.jetbrains.multik.ndarray.data.Ndarray
-import org.jetbrains.multik.ndarray.data.get
-import org.jetbrains.multik.ndarray.data.set
 
 class HMM(val trainingCorpus: List<String>, val vocab: Map<String, Int>) {
 
@@ -65,9 +65,10 @@ class HMM(val trainingCorpus: List<String>, val vocab: Map<String, Int>) {
         val tags = tagCounts.keys.toList().sorted()
 
         emissionProbsMatrix = mk.empty(NUMBER_OF_TAGS, NUMBER_OF_WORDS)
+        val reversedVocab = vocab.entries.associate { (k, v) -> v to k }
 
         for (i in 0 until NUMBER_OF_TAGS) for (j in 0 until NUMBER_OF_WORDS) {
-            val reversedVocab = vocab.entries.associate { (k, v) -> v to k }
+
             val key = Pair(tags[i], reversedVocab[j])
             val count = emissionCounts.getOrDefault(key, 0)
             val countTag = tagCounts[tags[i]]
@@ -113,6 +114,7 @@ class HMM(val trainingCorpus: List<String>, val vocab: Map<String, Int>) {
 
 
             for (k in 0 until NUMBER_OF_TAGS) {
+
                 val temp_prob =
                     updatedProbs[k, i - 1] + ln(transitionMatrix[k, j]) + ln(emissionProbsMatrix[j, vocab[sentence[i]]!!])
 
@@ -137,7 +139,6 @@ class HMM(val trainingCorpus: List<String>, val vocab: Map<String, Int>) {
         var bestProbForLastWord = Double.NEGATIVE_INFINITY
         val tags = tagCounts.keys.toList().sorted()
 
-
         val posPredictions = mutableListOf<String>()
 
         for (k in 0 until NUMBER_OF_TAGS) {
@@ -161,6 +162,20 @@ class HMM(val trainingCorpus: List<String>, val vocab: Map<String, Int>) {
         val (initialBestProbs, initialBestPaths) = initializeViterbiMatrices(sentence)
         val (updatedBestProbs, updatedBestPaths) = viterbiForward(sentence, initialBestProbs, initialBestPaths)
         return viterbiBackward(sentence, updatedBestProbs, updatedBestPaths)
+    }
+
+
+//    for score(test corpus):
+//    split test_corpus into (word, tag) pairs
+//    predictPOSSequence for words
+//    compare the word list and the tag list
+
+
+    fun score(testWords: List<String>, testTags: List<String>): Double {
+        val predictions = this.predictPOSSequence(testWords)
+        val numberOfCorrectPredictions = predictions.zip(testTags).count { it.first == it.second }
+
+        return numberOfCorrectPredictions.toDouble() / predictions.size
     }
 
 }
