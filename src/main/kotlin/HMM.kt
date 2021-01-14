@@ -8,8 +8,11 @@ import kotlin.math.ln
 
 class HMM(private val trainingCorpus: List<String>, private val vocab: Map<String, Int>) {
 
+//    transitionCounts stores how often a sequence of two tags occurs for each possible sequence of two tags
     private val transitionCounts = mutableMapOf<Pair<String, String>, Int>()
+//    emissionCounts stores how often a combinations of a tag and a word occurs for each tag and word combo
     private val emissionCounts = mutableMapOf<Pair<String, String>, Int>()
+//      tagCounts stores how often each tag is encountered in the trainingCorpus
     private val tagCounts = mutableMapOf<String, Int>()
 
     private var NUMBER_OF_TAGS = 0
