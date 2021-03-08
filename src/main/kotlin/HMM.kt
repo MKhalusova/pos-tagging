@@ -1,9 +1,6 @@
 import org.jetbrains.kotlinx.multik.api.empty
 import org.jetbrains.kotlinx.multik.api.mk
-import org.jetbrains.kotlinx.multik.ndarray.data.D2
-import org.jetbrains.kotlinx.multik.ndarray.data.Ndarray
-import org.jetbrains.kotlinx.multik.ndarray.data.get
-import org.jetbrains.kotlinx.multik.ndarray.data.set
+import org.jetbrains.kotlinx.multik.ndarray.data.*
 import kotlin.math.ln
 
 class HMM(private val trainingCorpus: List<String>, private val vocab: Map<String, Int>) {
@@ -18,8 +15,8 @@ class HMM(private val trainingCorpus: List<String>, private val vocab: Map<Strin
     private var NUMBER_OF_TAGS = 0
     private val NUMBER_OF_WORDS = vocab.size
 
-    private lateinit var transitionMatrix: Ndarray<Double, D2>
-    private lateinit var emissionProbsMatrix: Ndarray<Double, D2>
+    private lateinit var transitionMatrix: D2Array<Double>
+    private lateinit var emissionProbsMatrix: D2Array<Double>
 
     init {
         calculateCounts()
@@ -45,7 +42,7 @@ class HMM(private val trainingCorpus: List<String>, private val vocab: Map<Strin
     ) {
         val tags = tagCounts.keys.toList().sorted()
 
-        transitionMatrix = mk.empty(NUMBER_OF_TAGS, NUMBER_OF_TAGS)
+        transitionMatrix = mk.empty<Double, D2>(NUMBER_OF_TAGS, NUMBER_OF_TAGS)
 
 //      Go through each row and column of the transition matrix
         for (i in 0 until NUMBER_OF_TAGS) for (j in 0 until NUMBER_OF_TAGS) {
@@ -69,7 +66,7 @@ class HMM(private val trainingCorpus: List<String>, private val vocab: Map<Strin
     ) {
         val tags = tagCounts.keys.toList().sorted()
 
-        emissionProbsMatrix = mk.empty(NUMBER_OF_TAGS, NUMBER_OF_WORDS)
+        emissionProbsMatrix = mk.empty<Double, D2>(NUMBER_OF_TAGS, NUMBER_OF_WORDS)
         val reversedVocab = vocab.entries.associate { (k, v) -> v to k }
 
         for (i in 0 until NUMBER_OF_TAGS) for (j in 0 until NUMBER_OF_WORDS) {
@@ -83,7 +80,7 @@ class HMM(private val trainingCorpus: List<String>, private val vocab: Map<Strin
 
     private fun initializeViterbiMatrices(
         sentence: List<String>,
-    ): Pair<Ndarray<Double, D2>, Ndarray<Int, D2>> {
+    ): Pair<D2Array<Double>, D2Array<Int>> {
     /*
     returns two matrices: bestProbs = best probabilities (num of states by num of words in sentence) and
     bestPaths = best paths (num of states by num of words in sentence)
@@ -108,9 +105,9 @@ class HMM(private val trainingCorpus: List<String>, private val vocab: Map<Strin
 
     private fun viterbiForward(
         sentence: List<String>,
-        bestProbs: Ndarray<Double, D2>,
-        bestPaths: Ndarray<Int, D2>
-    ): Pair<Ndarray<Double, D2>, Ndarray<Int, D2>> {
+        bestProbs: D2Array<Double>,
+        bestPaths: D2Array<Int>
+    ): Pair<D2Array<Double>, D2Array<Int>> {
 
         val updatedProbs = bestProbs
         val updatedPaths = bestPaths
@@ -138,8 +135,8 @@ class HMM(private val trainingCorpus: List<String>, private val vocab: Map<Strin
 
     private fun viterbiBackward(
         sentence: List<String>,
-        bestProbs: Ndarray<Double, D2>,
-        bestPaths: Ndarray<Int, D2>
+        bestProbs: D2Array<Double>,
+        bestPaths: D2Array<Int>
     ): List<String> {
         val m = sentence.size
         val z = IntArray(m)
